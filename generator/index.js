@@ -2,16 +2,24 @@
 // dll:test 需要与 defaultMode 部分的指令一致
 // vue-cli-service 后的 test 需要与 pluginOptions 部分保持一致
 module.exports = (api, options, rootOptions) => {
+  const {
+    outputName = 'vendor',
+    outputPath = "public/vendor",
+    noCache = true
+  } = options;
+
   api.extendPackage({
     scripts: {
       'dll:test': 'vue-cli-service test'
     },
     vue: {
-      test: {
-        vendors: ['vue/dist/vue.runtime.esm.js', 'vue-router', 'vuex'],
-        outputName: 'vendor.dll.js',
-        outputPath: './public/vendor',
-        cleanCache: true
+      pluginOptions: {
+        test: {
+          vendors: [],
+          outputName,
+          outputPath,
+          noCache
+        }
       }
     }
   })

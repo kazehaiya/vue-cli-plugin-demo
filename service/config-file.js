@@ -11,6 +11,7 @@ module.exports = (api, options) => {
     api.configureWebpack(config => {
       // 设置忽略打包的 vender 文件，添加已打包文件
       config.plugins.push(new webpack.DllReferencePlugin({
+        context: api.getCwd(),
         manifest: require(api.resolve(`${outputPath}/manifest.json`))
       }));
       // 将 dll 生成的 vender 自动注入到 html 文件中

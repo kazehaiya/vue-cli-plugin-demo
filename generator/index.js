@@ -15,10 +15,16 @@ module.exports = (api, options, rootOptions) => {
     vue: {
       pluginOptions: {
         test: {
+          // 打包的插件
           vendors: [],
+          // 打包文件名
           outputName,
+          // 打包文件输出地址
           outputPath,
-          noCache
+          // 是否缓存先前打包的文件
+          noCache,
+          // 非开发环境不注入 DllReferencePlugin 配置（否则会影响错误捕获和 devtool 开启）
+          open: process.env.NODE_ENV === 'production'
         }
       }
     }

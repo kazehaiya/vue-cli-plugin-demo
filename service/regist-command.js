@@ -1,18 +1,13 @@
-const { log, logWithSpinner, done, stopSpinner } = require('@vue/cli-shared-utils')
+const { log, logWithSpinner, done, stopSpinner } = require('@vue/cli-shared-utils');
+const path = require('path');
+const webpack = require('webpack');
+// 导入 webpack-chain 模块，该模块导出了一个用于创建一个 webpack 配置API的单一构造函数。
+const Config = require('webpack-chain');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const { hasVendor } = require('../utils');
+const { yellow, green, blueBright, red } = require('chalk');
 
 module.exports = (api, options) => {
-  const path = require('path');
-  // 导入 webpack-chain 模块，该模块导出了一个用于创建一个webpack配置API的单一构造函数。
-  const webpack = require('webpack');
-  const Config = require('webpack-chain');
-  const CleanWebpackPlugin = require('clean-webpack-plugin');
-  // 对该单一构造函数创建一个新的配置实例
-  const config = new Config();
-  // 获取 package.json
-  const packageJson = require(api.resolve('package.json'));
-  const DEPEND = packageJson.dependencies || {};
-  const DEV_DEPEND = packageJson.devDependencies || {};
-
   api.registerCommand(
     "test",
     {
@@ -23,7 +18,10 @@ module.exports = (api, options) => {
       }
     },
     async args => {
-      logWithSpinner("Your run the test command, let's pack the dll!");
+      // 对该单一构造函数创建一个新的配置实例
+      const config = new Config();
+
+      logWithSpinner(blueBright("Let's pack the dll!\n"));
 
       const userDll = options.pluginOptions.test || {};
       const {
@@ -33,19 +31,13 @@ module.exports = (api, options) => {
         noCache = true
       } = userDll;
 
-      // 至少需要打包一个
-      if (!vendors.length) {
-        log('你没有需要预打包的内容！');
-        process.exit(0);
-      }
-
       // 配置 mode
       config.mode('production');
       // 配置 entry
       vendors.forEach(pack => {
-        // 验证是否包含此包
-        const vendorContent = DEPEND[pack] || DEV_DEPEND[pack];
-        vendorContent ? config.entry(outputName).add(pack) : log(`The package '${pack}' isn't found, passed`)
+        hasVendor(pack) ?
+          config.entry(outputName).add(pack) :
+          log(yellow(`\nWarning: The package '${pack}' isn't found in node_modules, passed\n`));
       });
       // 配置 output
       config.output
@@ -73,13 +65,10 @@ module.exports = (api, options) => {
         stopSpinner(false);
         log();
         if (err) {
-          log(err);
+          log(red(err));
           return false;
-        } else {
-          log('Build complete');
-          done('');
         }
+        done(green('Build complete!'));
       });
-
     })
 }

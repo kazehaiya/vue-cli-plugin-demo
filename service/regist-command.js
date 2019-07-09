@@ -13,16 +13,18 @@ module.exports = (api, options) => {
   const DEPEND = packageJson.dependencies || {};
   const DEV_DEPEND = packageJson.devDependencies || {};
 
-  api.registerCommand("test", {
-    description: "此为指令的说明",
-    usage: "vue-cli-service test",
-    options: {}
-  },
-  async args => {
-    logWithSpinner("Your run the test command, let's pack the dll!");
-    log();
+  api.registerCommand(
+    "test",
+    {
+      description: "此为指令的说明",
+      usage: "vue-cli-service test",
+      options: {
+        '--ignore': 'use default config of dll-plugins'
+      }
+    },
+    async args => {
+      logWithSpinner("Your run the test command, let's pack the dll!");
 
-    try {
       const userDll = options.pluginOptions.test || {};
       const {
         vendors = [],
@@ -78,11 +80,6 @@ module.exports = (api, options) => {
           done('');
         }
       });
-    } catch(e) {
-      log();
-      log(e);
-      process.exit(0);
-    }
 
-  })
+    })
 }
